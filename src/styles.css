@@ -1,0 +1,494 @@
+:root {
+  /* committed palette — derived from the voyage itself */
+  --black: #050505;
+  --midnight: #08111e;
+  --slate: #121212;
+  --moon: #e8edf5;
+  --moon-dim: rgba(232, 237, 245, 0.58);
+  --moon-faint: rgba(232, 237, 245, 0.32);
+  --gold: #ffb74d;
+  --gold-soft: #ffcd80;
+  --cyan: #8fd9e6;
+  --line: rgba(232, 237, 245, 0.1);
+  --line-strong: rgba(232, 237, 245, 0.2);
+  --panel: rgba(9, 16, 28, 0.55);
+
+  --display: "Fraunces", "Georgia", serif;
+  --sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background: var(--black);
+  color: var(--moon);
+  font-family: var(--sans);
+  font-weight: 300;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(255, 183, 77, 0.28);
+  color: var(--moon);
+}
+
+/* ---------- Layers ---------- */
+.canvas-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.scroll-driver {
+  position: fixed;
+  inset: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  z-index: 2;
+  scrollbar-width: none;
+}
+.scroll-driver::-webkit-scrollbar {
+  display: none;
+}
+.scroll-driver.locked {
+  overflow: hidden;
+}
+.scroll-spacer {
+  width: 1px;
+}
+.ui-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.ui-layer .interactive {
+  pointer-events: auto;
+}
+
+/* ---------- Eyebrow (shared structural label) ---------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--moon);
+  background: rgba(232, 237, 245, 0.035);
+  border: 1px solid var(--line-strong);
+  border-radius: 100px;
+  padding: 0.95rem 1.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  backdrop-filter: blur(10px);
+  transition: color 0.45s ease, border-color 0.45s ease, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.45s ease;
+}
+/* sheen sweep */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, 0.14) 50%, transparent 75%);
+  transform: translateX(-130%);
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn:hover {
+  border-color: rgba(255, 183, 77, 0.6);
+  color: var(--gold-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.btn:hover::before {
+  transform: translateX(130%);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.btn .arrow {
+  display: inline-block;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn:hover .arrow {
+  transform: translateX(4px);
+}
+
+.btn.primary {
+  color: #1a1206;
+  font-weight: 600;
+  border-color: transparent;
+  background: linear-gradient(180deg, #ffd089 0%, var(--gold) 55%, #f59a36 100%);
+  box-shadow: 0 0 0 1px rgba(255, 205, 128, 0.4), 0 10px 34px rgba(255, 153, 51, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+.btn.primary:hover {
+  color: #1a1206;
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(255, 205, 128, 0.6), 0 14px 44px rgba(255, 153, 51, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+/* ---------- Intro ---------- */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: radial-gradient(130% 100% at 50% 38%, rgba(8, 17, 30, 0.35) 0%, rgba(5, 5, 5, 0.9) 70%);
+  backdrop-filter: blur(3px);
+  padding: 24px;
+}
+.intro .eyebrow {
+  margin-bottom: 1.8rem;
+}
+.intro .eyebrow::after {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+.intro h1 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2.6rem, 7.5vw, 6rem);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 144;
+}
+.intro h1 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--gold);
+}
+.intro p {
+  margin-top: 1.9rem;
+  max-width: 31rem;
+  color: var(--moon-dim);
+  font-size: 1.05rem;
+  font-weight: 300;
+  line-height: 1.8;
+}
+.intro .actions {
+  margin-top: 3rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ---------- HUD ---------- */
+.wordmark {
+  position: absolute;
+  top: 30px;
+  left: 34px;
+}
+.wordmark .mark {
+  font-family: var(--display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 1.5rem;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+.wordmark .sub {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: 0.62rem;
+  color: var(--moon-faint);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.sound-toggle {
+  position: absolute;
+  top: 30px;
+  right: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  padding: 0.7rem 1.1rem;
+}
+.sound-toggle .bars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 14px;
+}
+.sound-toggle .bars span {
+  width: 2px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+.progress-rail {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  bottom: 28px;
+  height: 1px;
+  background: rgba(232, 237, 245, 0.08);
+}
+.progress-rail .fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold), var(--cyan));
+  box-shadow: 0 0 16px rgba(255, 183, 77, 0.6);
+}
+.progress-rail .fill::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold-soft);
+  box-shadow: 0 0 12px 2px rgba(255, 183, 77, 0.7);
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--moon-faint);
+  text-align: center;
+}
+.scroll-hint .mouse {
+  width: 22px;
+  height: 34px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  margin: 14px auto 0;
+  position: relative;
+}
+.scroll-hint .mouse::after {
+  content: "";
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--gold);
+  animation: wheel 1.7s ease-in-out infinite;
+}
+@keyframes wheel {
+  0% { opacity: 0; transform: translate(-50%, 0); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, 12px); }
+}
+
+/* ---------- Project Panel ---------- */
+.project-panel {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(33rem, 40vw);
+  padding: 2.4rem 2.6rem;
+  background: var(--panel);
+  backdrop-filter: blur(24px) saturate(125%);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+/* accent rule down the leading edge */
+.project-panel::before {
+  content: "";
+  position: absolute;
+  top: 2.4rem;
+  bottom: 2.4rem;
+  left: 0;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--accent-stop, var(--gold)), transparent);
+}
+.project-panel.side-left {
+  left: 4.5vw;
+}
+.project-panel.side-right {
+  right: 4.5vw;
+}
+.project-panel .index {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--moon-faint);
+  margin-bottom: 1rem;
+}
+.project-panel .eyebrow {
+  margin-bottom: 1.1rem;
+}
+.project-panel h2 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2.1rem, 3.6vw, 3.2rem);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 100;
+}
+.project-panel .desc {
+  margin-top: 1.3rem;
+  color: var(--moon-dim);
+  line-height: 1.8;
+  font-size: 0.98rem;
+  font-weight: 300;
+}
+.project-panel .tags {
+  margin-top: 1.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.project-panel .tag {
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  padding: 0.42rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 100px;
+  color: var(--moon-dim);
+  background: rgba(255, 255, 255, 0.02);
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.project-panel .tag:hover {
+  color: var(--moon);
+  border-color: rgba(255, 183, 77, 0.5);
+}
+.project-panel .cta {
+  margin-top: 2.1rem;
+}
+
+/* ---------- Final Scene ---------- */
+.final {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  background: radial-gradient(130% 110% at 50% 50%, rgba(143, 217, 230, 0.08) 0%, rgba(5, 5, 5, 0.78) 65%);
+}
+.final .eyebrow {
+  color: var(--cyan);
+  margin-bottom: 1.8rem;
+}
+.final .eyebrow::after {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+.final h1 {
+  font-family: var(--display);
+  font-weight: 300;
+  font-size: clamp(2.6rem, 7vw, 5.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.015em;
+  font-variation-settings: "opsz" 144;
+}
+.final h1 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--cyan);
+}
+.final p {
+  margin-top: 1.5rem;
+  color: var(--moon-dim);
+  font-weight: 300;
+  max-width: 33rem;
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+.final .actions {
+  margin-top: 3rem;
+  display: flex;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+@media (max-width: 720px) {
+  .wordmark { top: 18px; left: 18px; }
+  .wordmark .mark { font-size: 1.25rem; }
+  .sound-toggle { top: 18px; right: 18px; }
+  .project-panel {
+    width: auto;
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: 92px;
+    transform: none;
+    padding: 1.6rem 1.7rem;
+  }
+  .project-panel.side-left,
+  .project-panel.side-right { left: 16px; right: 16px; }
+  .progress-rail { left: 16px; right: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn::before,
+  .btn .arrow { transition: none; }
+  .scroll-hint .mouse::after { animation: none; }
+}
