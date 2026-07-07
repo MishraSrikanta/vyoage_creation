@@ -202,6 +202,57 @@ function Fireflies() {
   );
 }
 
+/** Scattered ambient point lights creating moody, atmospheric lighting in the scene */
+function AmbientLights() {
+  const lights = useMemo(() => {
+    const list: { pos: [number, number, number]; color: string; intensity: number; distance: number; seed: number }[] = [];
+    // Create 8 scattered lights along the journey path
+    for (let i = 0; i < 8; i++) {
+      const z = -50 - i * 100;
+      const side = i % 2 === 0 ? 1 : -1;
+      const x = side * (15 + rand(i) * 35);
+      const y = 8 + rand(i + 1) * 12;
+      const colors = ["#00ff99", "#B066D9", "#00D9FF", "#ff6b9d"];
+      const color = colors[i % colors.length];
+      const intensity = 0.4 + rand(i + 2) * 0.5;
+      const distance = 50 + rand(i + 3) * 40;
+      list.push({ pos: [x, y, z], color, intensity, distance, seed: rand(i + 4) * Math.PI * 2 });
+    }
+    return list;
+  }, []);
+
+  const lightRefs = useRef<THREE.Light[]>([]);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime;
+    lights.forEach((light, i) => {
+      const ref = lightRefs.current[i];
+      if (!ref) return;
+      // Gentle pulsing intensity
+      const pulse = 0.6 + 0.4 * Math.sin(t * 0.8 + light.seed);
+      ref.intensity = light.intensity * pulse;
+    });
+  });
+
+  return (
+    <group>
+      {lights.map((light, i) => (
+        <pointLight
+          key={i}
+          ref={(el) => {
+            if (el) lightRefs.current[i] = el;
+          }}
+          position={light.pos}
+          color={light.color}
+          intensity={light.intensity}
+          distance={light.distance}
+          decay={2}
+        />
+      ))}
+    </group>
+  );
+}
+
 export default function SceneEnvironment() {
   return (
     <group>
@@ -212,6 +263,7 @@ export default function SceneEnvironment() {
 
       <Sky />
       <Fireflies />
+      <AmbientLights />
       <Mountains />
       <Islands />
       <Birds />

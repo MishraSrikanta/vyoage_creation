@@ -5,6 +5,7 @@ import { projects } from "../data/projects";
  * The voyage spline. The boat travels along this curve from t=0 (start, alone in
  * the dark) to t=1 (the RGB pillars). It gently curves through the lake with no
  * sharp turns — control points only drift in X while marching steadily in -Z.
+ * Extended with more control points for smoother, longer journey with more scroll distance.
  */
 const CONTROL_POINTS = [
   new THREE.Vector3(0, 0, 0),
@@ -14,8 +15,12 @@ const CONTROL_POINTS = [
   new THREE.Vector3(-8, 0, -290),
   new THREE.Vector3(6, 0, -380),
   new THREE.Vector3(-5, 0, -475),
-  new THREE.Vector3(0, 0, -560),
-  new THREE.Vector3(0, 0, -640),
+  new THREE.Vector3(8, 0, -560),
+  new THREE.Vector3(-7, 0, -650),
+  new THREE.Vector3(5, 0, -740),
+  new THREE.Vector3(-4, 0, -840),
+  new THREE.Vector3(3, 0, -940),
+  new THREE.Vector3(0, 0, -1020),
 ];
 
 export const path = new THREE.CatmullRomCurve3(CONTROL_POINTS, false, "catmullrom", 0.5);
@@ -45,6 +50,12 @@ export interface BillboardPlacement {
   side: 1 | -1;
 }
 
+// Tweak these values to control how much space the boat travels between projects.
+// Keep the end value inside the path range so every billboard stays on the route.
+export const PROJECT_START_T = 0.02;
+export const PROJECT_END_T = 1.2;
+export const PROJECT_GAP_T = (PROJECT_END_T - PROJECT_START_T) / Math.max(1, projects.length - 1);
+
 function pseudo(i: number, seed: number) {
   // deterministic 0..1 hash-ish value
   const x = Math.sin(i * 127.1 + seed * 311.7) * 43758.5453;
@@ -52,7 +63,7 @@ function pseudo(i: number, seed: number) {
 }
 
 export const placements: BillboardPlacement[] = projects.map((_, i) => {
-  const t = THREE.MathUtils.lerp(0.08, 0.9, i / Math.max(1, projects.length - 1));
+  const t = PROJECT_START_T + i * PROJECT_GAP_T;
   const side: 1 | -1 = i % 2 === 0 ? 1 : -1;
 
   const center = pointAt(t, new THREE.Vector3());
@@ -60,7 +71,7 @@ export const placements: BillboardPlacement[] = projects.map((_, i) => {
   // perpendicular in the XZ plane
   const normal = new THREE.Vector3(-tan.z, 0, tan.x).normalize();
 
-  const distance = 13 + pseudo(i, 1) * 5; // 13..18 from the path — close enough to read clearly
+  const distance = 15 + pseudo(i, 1) * 5; // 15..20 from the path for breathing room without crowding the route
   const height = 6.5 + pseudo(i, 2) * 2.5; // billboard centre height
   const pos = center
     .clone()
@@ -76,4 +87,4 @@ export const placements: BillboardPlacement[] = projects.map((_, i) => {
 });
 
 /** World-space position of the three RGB destination pillars (end of journey). */
-export const PILLARS_Z = -648;
+export const PILLARS_Z = -1020;

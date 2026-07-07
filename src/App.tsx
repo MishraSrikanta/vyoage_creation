@@ -9,6 +9,8 @@ import Hud from "./ui/Hud";
 import ProjectPanel from "./ui/ProjectPanel";
 import FinalScene from "./ui/FinalScene";
 
+const SCROLL_SPACER_HEIGHT = "7200vh";
+
 export default function App() {
   const started = useVoyage((s) => s.started);
   const setLowPower = useVoyage((s) => s.setLowPower);
@@ -60,7 +62,7 @@ export default function App() {
         className={`scroll-driver ${started ? "" : "locked"}`}
         onScroll={onScroll}
       >
-        <div className="scroll-spacer" style={{ height: "1600vh" }} />
+        <div className="scroll-spacer" style={{ height: SCROLL_SPACER_HEIGHT }} />
       </div>
 
       <div className="ui-layer">

@@ -6,7 +6,7 @@ import { pointAt, tangentAt, placements } from "./path";
 import { waveHeight } from "./wave";
 import { dofTarget } from "./shared";
 
-const FOCUS_RANGE = 0.075;
+const FOCUS_RANGE = 0.05;
 
 const _boat = new THREE.Vector3();
 const _tan = new THREE.Vector3();
@@ -38,10 +38,10 @@ export default function CameraRig() {
     // ---- default cinematic follow: behind & above the boat ----
     _defaultPos
       .copy(boat)
-      .addScaledVector(tan, -9.5)
-      .addScaledVector(_up, 4.6)
-      .addScaledVector(_right, 1.2);
-    _defaultLook.copy(boat).addScaledVector(tan, 14).addScaledVector(_up, 1.2);
+      .addScaledVector(tan, -12.5)
+      .addScaledVector(_up, 6.8)
+      .addScaledVector(_right, 1.4);
+    _defaultLook.copy(boat).addScaledVector(tan, 14).addScaledVector(_up, 1.4);
 
     // ---- find the nearest billboard and compute focus blend ----
     let nearest = -1;
